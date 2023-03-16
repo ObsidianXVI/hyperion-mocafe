@@ -22,6 +22,7 @@ class Interface {
       if (str != '\n') {
         sel.add(str);
       } else {
+        if (sel.join() == '!exit') Mocafe.deinit();
         final int qty = int.tryParse(sel.join().trim().split(' ').first) ?? 1;
         final Order order = Order(sel.join(), qty);
         Tracker.addOrder(order);

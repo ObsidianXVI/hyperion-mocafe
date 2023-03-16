@@ -17,11 +17,12 @@ class Mocafe {
   static void init() async {
     Machine.init();
     Interface.init();
-    Future.delayed(const Duration(seconds: 25), () {
-      Machine.deinit();
-      Interface.deinit();
-      exit(0);
-    });
+  }
+
+  static void deinit() {
+    Machine.deinit();
+    Interface.deinit();
+    exit(0);
   }
 }
 
