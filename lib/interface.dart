@@ -9,11 +9,11 @@ class Interface {
 
   static void init() {
     screenRefresher =
-        Timer.periodic(const Duration(milliseconds: 1000), (Timer t) {
+        Timer.periodic(const Duration(seconds: screenRefreshRate), (Timer t) {
       renderScreen();
     });
-    drinksAvailabilityRefresher =
-        Timer.periodic(const Duration(seconds: 5), (Timer t) async {
+    drinksAvailabilityRefresher = Timer.periodic(
+        const Duration(seconds: menuRefreshRate), (Timer t) async {
       availableDrinks = (await API.getDrinksAvailable());
     });
     stdin.lineMode = false;

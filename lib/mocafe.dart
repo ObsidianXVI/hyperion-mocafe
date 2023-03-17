@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:markhor/markhor.dart';
 
 part './interface.dart';
 part './api.dart';
@@ -26,6 +27,15 @@ class Mocafe {
   }
 }
 
+const int machineFetchRate = 3;
+const int screenRefreshRate = 1;
+const int menuRefreshRate = 5;
 void main(List<String> args) {
+  MarkhorConfigs.network.responseInterceptors.addAll({
+    Uri.https("api.sampleapis.com", "/coffee/hot"):
+        (Uri _, HttpClientResponse res) async {
+      return await Future.delayed(const Duration(seconds: 12), () => res);
+    }
+  });
   Mocafe.init();
 }
