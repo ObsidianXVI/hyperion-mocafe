@@ -10,10 +10,12 @@ class Interface {
   static void init() {
     screenRefresher =
         Timer.periodic(const Duration(seconds: screenRefreshRate), (Timer t) {
+      energyTokensConsumed++;
       renderScreen();
     });
     drinksAvailabilityRefresher = Timer.periodic(
         const Duration(seconds: menuRefreshRate), (Timer t) async {
+      energyTokensConsumed++;
       availableDrinks = (await API.getDrinksAvailable());
     });
     stdin.lineMode = false;

@@ -5,6 +5,7 @@ class Machine {
   static void init() async {
     serveLoop =
         Timer.periodic(const Duration(seconds: machineFetchRate), (Timer t) {
+      energyTokensConsumed += 5;
       if (Mocafe.isActive && Tracker._orders.isNotEmpty) {
         serveNext();
       }
