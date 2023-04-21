@@ -15,12 +15,10 @@ class Machine {
   static void deinit() => serveLoop.cancel();
 
   static Future<void> serveNext() async {
-    return await Delay.action<void>(() {
-      final Order? order = Tracker.getNextOrder();
-      if (order != null) {
-        Tracker.fulfillOrder(order);
-      }
-    }, Duration(seconds: Utils.genInt(3, 8) + 2));
+    final Order? order = Tracker.getNextOrder();
+    if (order != null) {
+      Tracker.fulfillOrder(order);
+    }
   }
 }
 
