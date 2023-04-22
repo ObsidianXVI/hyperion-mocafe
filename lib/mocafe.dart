@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:markhor/markhor.dart';
 
 part './interface.dart';
 part './api.dart';
