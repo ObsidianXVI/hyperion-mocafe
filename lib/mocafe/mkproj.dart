@@ -10,3 +10,4 @@ part './environment/states/global_states.dart';
 part './environment/params/param_sets.dart';
 part './resources/data_cells/data_cells.dart';
 part './resources/resource_manager/resource_manager.dart';
+part './resources/resource_manager/resource_configs.dart';

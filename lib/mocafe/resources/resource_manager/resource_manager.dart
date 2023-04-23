@@ -1,5 +1,9 @@
 part of mocafe_mkproj;
 
 class MocafeResourceManager extends ResourceManager {
-  MocafeResourceManager(MocafeEnvironment env) : super(env);
+  int ingredientTokens;
+
+  MocafeResourceManager(MocafeResourceConfigs resourceConfigs)
+      : ingredientTokens = resourceConfigs.ingredientTokens,
+        super(resourceConfigs);
 }
