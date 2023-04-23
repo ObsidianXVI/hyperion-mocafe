@@ -42,14 +42,19 @@ class QL_Agent {
   void beginEpisode(State initialState) {
     if (initialState.isTerminal) throw Exception("Initial state is terminal");
     perform(initialState);
-    MocafeState state = MocafeState.current(env);
-    while (!state.isTerminal) {
-      perform(state);
-      state = MocafeState.current(env);
+    try {
+      while (true) {
+        perform();
+      }
+    } on Exception catch (e) {
+      if (e.toString() == 'Initial state is terminal') {
+        return;
+      }
     }
   }
 
-  void perform(State state) {
+  void perform([State? state]) {
+    state ??= MocafeState.current(env);
     timeStep++;
     // fetch all available Q-values
     final Map<QVector, double> qValuesOfState = fetchHistoricalQValues(state);
