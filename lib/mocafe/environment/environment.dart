@@ -6,8 +6,8 @@ class MocafeEnvironment extends DevelopmentEnv {
 
   MocafeEnvironment({
     required super.actionSpace,
-    required super.parameterSpace,
     required super.stateSpace,
+    required super.paramSpace,
     required super.networkConfigs,
     required this.mocafeResourceConfigs,
     required this.mocafeResourceManager,
@@ -20,14 +20,18 @@ class MocafeEnvironment extends DevelopmentEnv {
   MocafeGlobalState get globalState => MocafeGlobalState();
 
   @override
-  double performAction<R, P extends ParamSet<Action<R>>>(
-    Action<R> action,
-    ArgSet<P> argSet,
-  ) {
+  ActionResult performAction<R>(Action<R> action, ArgSet<Action<R>> argSet) {
+    final MocafeState previouState = MocafeState.current(this);
     action.body(argSet);
-    MocafeState.current(this);
-    return (mocafeResourceManager.ingredientTokens +
-            mocafeResourceManager.memoryTokens) /
-        200;
+    final MocafeState newState = MocafeState.current(this);
+    return ActionResult(
+      previouState: previouState,
+      actionTaken: action,
+      argSetUsed: argSet,
+      reward: (mocafeResourceManager.ingredientTokens +
+              mocafeResourceManager.memoryTokens) /
+          200,
+      newState: newState,
+    );
   }
 }

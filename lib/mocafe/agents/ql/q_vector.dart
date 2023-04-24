@@ -2,16 +2,19 @@ library ql_agent.types;
 
 import 'package:mocafe/mocafe/mkproj.dart';
 
-class QVector {
-  final State state;
-  final Action action;
+class MocafeQVector extends QVector {
   final ArgSet argSet;
 
-  QVector(this.state, this.action, this.argSet);
+  MocafeQVector(super.state, super.action, this.argSet)
+      : super(dimensions: 3, values: [
+          state,
+          action,
+          argSet,
+        ]);
 
   @override
-  bool operator ==(Object other) {
-    if (other is! QVector) {
+  bool equalityComparator(Object other) {
+    if (other is! MocafeQVector) {
       return false;
     } else {
       return (state == other.state &&
