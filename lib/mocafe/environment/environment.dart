@@ -73,7 +73,6 @@ class MocafeEnvironment extends DevelopmentEnv {
       for (Action action in actionSpace.actions) {
         for (ArgSet argSet in paramSpace.argSets) {
           qTable[MocafeQVector(state, action, argSet)] = 0;
-          // print(mocafeQVector.toVectorStr());
         }
       }
     }

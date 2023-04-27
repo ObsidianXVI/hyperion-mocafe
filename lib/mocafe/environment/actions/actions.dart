@@ -54,4 +54,7 @@ class FetchMenuArgSet extends ArgSet {
   String toInstanceLabel() {
     return "FetchMenuArgSet()<$menuSize>";
   }
+
+  @override
+  String toString() => toInstanceLabel();
 }

@@ -79,7 +79,10 @@ class MocafeQLAgent extends QLAgent {
     Action actionToBeTaken,
     ArgSet argSetUsed,
   ) {
-    print(qTable.keys.first.toVectorStr());
+    print(qTable.entries
+        .where((e) => e.value > 0)
+        .map((e) => "${e.key.toVectorStr()}\n${e.value}\n")
+        .join());
     final bool has =
         qTable.containsKey(MocafeQVector(stateIn, actionToBeTaken, argSetUsed));
     final MocafeState state = MocafeState.current(env);

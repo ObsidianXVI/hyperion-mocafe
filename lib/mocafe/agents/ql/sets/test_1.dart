@@ -78,9 +78,10 @@ void main(List<String> args) {
     runConfigs: QLRunConfigs(
       learningRate: 0.1,
       discountFactor: 0.9,
-      epsilonValue: 1,
+      epsilonValue: 0.8,
       epochs: 1,
       episodes: 10,
+      timestepPause: const Duration(seconds: 2),
     ),
   );
 
