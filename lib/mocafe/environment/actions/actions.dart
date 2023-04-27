@@ -11,7 +11,8 @@ class Drink {
 class FetchMenuAction extends Action<FetchMenuArgSet> {
   FetchMenuAction()
       : super(
-          body: (FetchMenuArgSet argSet) {
+          body: (ArgSet argSet) {
+            argSet as FetchMenuArgSet;
             List<Drink> trimMenu(List<Drink> originalMenu) {
               if (argSet.menuSize <= originalMenu.length) {
                 return originalMenu.sublist(0, argSet.menuSize);
@@ -27,10 +28,7 @@ class FetchMenuAction extends Action<FetchMenuArgSet> {
               Drink('Americano', 7, 0.7),
               Drink('Black', 2, 0.3),
             ];
-
-            argSet.menuCell.data
-              ..clear()
-              ..addAll(trimMenu(fullMenu));
+            argSet.menuCell.update(trimMenu(fullMenu));
           },
         );
 }
@@ -51,4 +49,9 @@ class FetchMenuArgSet extends ArgSet {
   const FetchMenuArgSet.size2(this.menuCell) : menuSize = 2;
   const FetchMenuArgSet.size3(this.menuCell) : menuSize = 3;
   const FetchMenuArgSet.size4(this.menuCell) : menuSize = 4;
+
+  @override
+  String toInstanceLabel() {
+    return "FetchMenuArgSet()<$menuSize>";
+  }
 }

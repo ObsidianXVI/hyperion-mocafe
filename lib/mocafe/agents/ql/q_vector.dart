@@ -4,10 +4,11 @@ import 'package:mocafe/mocafe/mkproj.dart';
 
 class MocafeQVector extends QVector {
   final ArgSet argSet;
+  final MocafeState mocafeState;
 
-  MocafeQVector(super.state, super.action, this.argSet)
-      : super(dimensions: 3, values: [
-          state,
+  MocafeQVector(this.mocafeState, Action action, this.argSet)
+      : super(mocafeState, action, dimensions: 3, values: [
+          mocafeState,
           action,
           argSet,
         ]);

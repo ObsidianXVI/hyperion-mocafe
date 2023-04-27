@@ -1,9 +1,12 @@
 library mocafe_mkproj;
 
 import 'dart:math';
+import 'dart:mirrors';
 
 import 'package:markhor/markhor.dart';
 export 'package:markhor/markhor.dart';
+
+import './agents/ql/q_vector.dart';
 
 part './environment/environment.dart';
 part './environment/actions/actions.dart';

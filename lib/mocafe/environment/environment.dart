@@ -7,7 +7,9 @@ class MocafeEnvironment extends DevelopmentEnv {
 
   MocafeEnvironment({
     required super.actionSpace,
-    required super.stateSpace,
+    required List<MocafeState> Function(
+            MocafeResourceConfigs, ParamSpace, ActionSpace)
+        stateSpaceGenerator,
     required super.paramSpace,
     required super.networkConfigs,
     required this.mocafeResourceConfigs,
@@ -15,10 +17,16 @@ class MocafeEnvironment extends DevelopmentEnv {
     required this.mocafeDataStore,
     super.observatory,
   }) : super(
+          stateSpace: StateSpace<MocafeState>(
+            states: stateSpaceGenerator(
+                mocafeResourceConfigs, paramSpace, actionSpace),
+          ),
           resourceConfigs: mocafeResourceConfigs,
           resourceManager: mocafeResourceManager,
           dataStore: mocafeDataStore,
-        );
+        ) {
+    MocafeState._actions.addAll(actionSpace.actions);
+  }
 
   @override
   MocafeGlobalState get globalState => MocafeGlobalState();
@@ -26,7 +34,8 @@ class MocafeEnvironment extends DevelopmentEnv {
   @override
   ActionResult performAction(Action action, ArgSet argSet) {
     final MocafeState previouState = MocafeState.current(this);
-    action.body(argSet);
+    print(argSet.toInstanceLabel());
+    action.body(action.convertArgSet(argSet));
     final MocafeState newState = MocafeState.current(this);
     return ActionResult(
       previouState: previouState,
@@ -45,8 +54,29 @@ class MocafeEnvironment extends DevelopmentEnv {
                 mocafeResourceConfigs.memoryTokens!);
     final Random random = Random();
     final List<Drink> currentMenu = mocafeDataStore.menuCell.data;
-    final int randInt = random.nextInt(currentMenu.length);
-    final double customerReward = currentMenu[randInt].monetaryValue;
+    final double customerReward;
+    if (currentMenu.isEmpty) {
+      customerReward = 0;
+    } else {
+      final int randInt = random.nextInt(currentMenu.length);
+
+      customerReward = currentMenu[randInt].monetaryValue;
+    }
     return resourceConservationReward + customerReward;
+  }
+
+  @override
+  Map<MocafeQVector, double> initialiseQTable() {
+    Map<MocafeQVector, double> qTable = {};
+
+    for (MocafeState state in stateSpace.states as List<MocafeState>) {
+      for (Action action in actionSpace.actions) {
+        for (ArgSet argSet in paramSpace.argSets) {
+          qTable[MocafeQVector(state, action, argSet)] = 0;
+          // print(mocafeQVector.toVectorStr());
+        }
+      }
+    }
+    return qTable;
   }
 }

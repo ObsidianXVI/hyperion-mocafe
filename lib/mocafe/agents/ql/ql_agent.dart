@@ -3,20 +3,24 @@ part of agents;
 class MocafeQLAgent extends QLAgent {
   final MocafeEnvironment env;
   final List<ArgSet> argSets;
-
-  MocafeQLAgent({required this.env, required super.runConfigs})
-      : argSets = env.paramSpace.argSets,
-        super(env: env);
+  final List<MocafeState> mocafeStates;
 
   /// Key is a 3-dimensional vector (stateIndex, actionIndex, argSetIndex),
   /// which will be called a [MocafeQVector] henceforth.
   /// Respective value is the Q-value for that MocafeQVector.
   /// As such, a 3-dimensional Q-table is implemented.
-  final Map<MocafeQVector, double> qTable = {};
+  final Map<MocafeQVector, double> qTable;
+
+  MocafeQLAgent({required this.env, required super.runConfigs})
+      : argSets = env.paramSpace.argSets,
+        qTable = env.initialiseQTable(),
+        mocafeStates = env.stateSpace.states.whereType<MocafeState>().toList(),
+        super(env: env);
 
   @override
   ActionResult perform([State? state]) {
     state ??= MocafeState.current(env);
+    state as MocafeState;
     // fetch all available Q-values
     final Map<MocafeQVector, double> qValuesOfState =
         fetchHistoricalQValues(state);
@@ -43,7 +47,7 @@ class MocafeQLAgent extends QLAgent {
     final double reward = actionResult.reward;
 
     // calculate temporal difference
-    final State newState = MocafeState.current(env);
+    final MocafeState newState = MocafeState.current(env);
     final double maxFutureValue = computeMaxFutureQValue(newState);
     final double historicalQValue = qValuesOfState.values.toList()[comboIndex];
     final double newQValue =
@@ -71,11 +75,14 @@ class MocafeQLAgent extends QLAgent {
   }
 
   double fetchHistoricalQValue(
-    State stateIn,
+    MocafeState stateIn,
     Action actionToBeTaken,
     ArgSet argSetUsed,
   ) {
-    final State state = states.firstWhere((State s) => s == stateIn);
+    print(qTable.keys.first.toVectorStr());
+    final bool has =
+        qTable.containsKey(MocafeQVector(stateIn, actionToBeTaken, argSetUsed));
+    final MocafeState state = MocafeState.current(env);
     final Action action =
         actions.firstWhere((Action a) => a == actionToBeTaken);
     final ArgSet argSet = argSets.firstWhere((ArgSet arg) => arg == argSetUsed);
@@ -88,14 +95,14 @@ class MocafeQLAgent extends QLAgent {
     }
   }
 
-  double computeMaxFutureQValue(State newState) {
+  double computeMaxFutureQValue(MocafeState newState) {
     final Map<MocafeQVector, double> qValuesOfState =
         fetchHistoricalQValues(newState);
     final double maxQValue = qValuesOfState.values.toList().reduce(math.max);
     return maxQValue;
   }
 
-  Map<MocafeQVector, double> fetchHistoricalQValues(State state) {
+  Map<MocafeQVector, double> fetchHistoricalQValues(MocafeState state) {
     final Map<MocafeQVector, double> qValuesOfState = {};
     for (Action action in state.actionsAvailable) {
       for (ArgSet argSet in argSets) {
@@ -110,8 +117,8 @@ class MocafeQLAgent extends QLAgent {
   /// to obtain ε-greedy/optimal policy.
   T select<T>(List<T> possibleChoices, T optimalChoice) {
     final math.Random random = math.Random();
-    if (random.nextDouble() < runConfigs.epsilonValue) {
-      return possibleChoices[random.nextInt(possibleChoices.length - 1)];
+    if (random.nextDouble() > runConfigs.epsilonValue) {
+      return possibleChoices[random.nextInt(possibleChoices.length)];
     } else {
       return optimalChoice;
     }
