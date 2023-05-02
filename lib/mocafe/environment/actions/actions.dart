@@ -44,11 +44,21 @@ class FetchMenuArgSet extends ArgSet {
     required this.menuSize,
   }); */
 
-  const FetchMenuArgSet.size0(this.menuCell) : menuSize = 0;
-  const FetchMenuArgSet.size1(this.menuCell) : menuSize = 1;
-  const FetchMenuArgSet.size2(this.menuCell) : menuSize = 2;
-  const FetchMenuArgSet.size3(this.menuCell) : menuSize = 3;
-  const FetchMenuArgSet.size4(this.menuCell) : menuSize = 4;
+  const FetchMenuArgSet.size0(this.menuCell)
+      : menuSize = 0,
+        super(dimensions: 1, values: const [0]);
+  const FetchMenuArgSet.size1(this.menuCell)
+      : menuSize = 1,
+        super(dimensions: 1, values: const [1]);
+  const FetchMenuArgSet.size2(this.menuCell)
+      : menuSize = 2,
+        super(dimensions: 1, values: const [2]);
+  const FetchMenuArgSet.size3(this.menuCell)
+      : menuSize = 3,
+        super(dimensions: 1, values: const [3]);
+  const FetchMenuArgSet.size4(this.menuCell)
+      : menuSize = 4,
+        super(dimensions: 1, values: const [4]);
 
   @override
   String toInstanceLabel() {
