@@ -3,7 +3,7 @@ library ql_test_1;
 import '../../agents.dart';
 import '../../../mkproj.dart';
 
-void main(List<String> args) {
+void main(List<String> args) async {
   // ENVIRONMENT CONFIGURATION
   final MocafeResourceConfigs resourceConfigs = MocafeResourceConfigs(
     memoryTokens: 99,
@@ -16,7 +16,9 @@ void main(List<String> args) {
   });
   final Observatory observatory =
       Observatory(observatoryConfigs: ObservatoryConfigs());
-  final Timeline timeline = Timeline(timelineConfigs: TimelineConfigs());
+  final Timeline timeline =
+      Timeline(timelineConfigs: TimelineConfigs(liveReport: true));
+  timeline.listenOn(observatory);
 
   final MocafeEnvironment env = MocafeEnvironment(
     actionSpace: ActionSpace(actions: [
@@ -34,8 +36,11 @@ void main(List<String> args) {
         for (int ingToks = 0;
             ingToks < mocafeResourceConfigs.ingredientTokens;
             ingToks++) {
-          states.add(
-              MocafeState(memoryTokens: memToks, ingredientTokens: ingToks));
+          states.add(MocafeState(
+            memoryTokens: memToks,
+            ingredientTokens: ingToks,
+            isTerminal: memToks == 0 && ingToks == 0,
+          ));
         }
       }
       return states;
@@ -52,11 +57,21 @@ void main(List<String> args) {
     networkConfigs: NetworkConfigs(),
     mocafeDataStore: mocafeDataStore,
     observatory: observatory,
+    qlRunConfigs: QLRunConfigs(
+      learningRate: 0.1,
+      learningRateDecay: -0.00005,
+      discountFactor: 0.9,
+      epsilonValue: 0.8,
+      epochs: 1,
+      episodes: 10,
+      timestepPause: Duration.zero,
+    ),
   );
 
   env.addHook(TimestepHook(
       env: env,
       body: (Environment _) {
+        // Decrease the resource tokens
         final int ingredientToksConsumed;
         if (env.mocafeDataStore.menuCell.data.isEmpty) {
           ingredientToksConsumed = 0;
@@ -67,23 +82,26 @@ void main(List<String> args) {
         }
 
         env.mocafeResourceManager.ingredientTokens -= ingredientToksConsumed;
+        if (env.mocafeResourceManager.ingredientTokens < 0) {
+          env.mocafeResourceManager.ingredientTokens = 0;
+        }
 
         final int memoryToksConsumed = env.mocafeDataStore.menuCell.size();
         env.mocafeResourceManager.memoryTokens -= memoryToksConsumed;
+        if (env.mocafeResourceManager.memoryTokens < 0) {
+          env.mocafeResourceManager.memoryTokens = 0;
+        }
+
+        // Decay the learning rate
+        env.qlRunConfigs.learningRate -= env.qlRunConfigs.learningRateDecay;
       }));
 
   // HYPERPARAMETERS CONFIGURATION
   final MocafeQLAgent qlAgent = MocafeQLAgent(
     env: env,
-    runConfigs: QLRunConfigs(
-      learningRate: 0.1,
-      discountFactor: 0.9,
-      epsilonValue: 0.8,
-      epochs: 1,
-      episodes: 10,
-      timestepPause: const Duration(seconds: 2),
-    ),
+    runConfigs: env.qlRunConfigs,
   );
 
-  qlAgent.run(MocafeState.current(env));
+  await qlAgent.run(MocafeState.current(env));
+  print("Data exported to: ${await timeline.exportCSV('test_1_3')}");
 }

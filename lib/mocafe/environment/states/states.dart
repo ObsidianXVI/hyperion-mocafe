@@ -8,6 +8,7 @@ class MocafeState extends State {
   MocafeState({
     required this.memoryTokens,
     required this.ingredientTokens,
+    super.isTerminal,
   }) : super(actionsAvailable: _actions, dimensions: 3, values: [
           memoryTokens,
           ingredientTokens,
@@ -17,11 +18,16 @@ class MocafeState extends State {
   MocafeState.current(MocafeEnvironment env)
       : memoryTokens = env.mocafeResourceManager.memoryTokens,
         ingredientTokens = env.mocafeResourceManager.ingredientTokens,
-        super(actionsAvailable: _actions, dimensions: 3, values: [
-          env.mocafeResourceManager.memoryTokens,
-          env.mocafeResourceManager.ingredientTokens,
-          _actions,
-        ]);
+        super(
+            actionsAvailable: _actions,
+            dimensions: 3,
+            isTerminal: env.mocafeResourceManager.memoryTokens == 0 &&
+                env.mocafeResourceManager.ingredientTokens == 0,
+            values: [
+              env.mocafeResourceManager.memoryTokens,
+              env.mocafeResourceManager.ingredientTokens,
+              _actions,
+            ]);
 
   @override
   bool equalityComparator(Object other) {

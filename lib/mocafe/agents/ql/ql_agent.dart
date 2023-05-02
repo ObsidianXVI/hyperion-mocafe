@@ -21,6 +21,7 @@ class MocafeQLAgent extends QLAgent {
   ActionResult perform([State? state]) {
     state ??= MocafeState.current(env);
     state as MocafeState;
+    if (state.isTerminal) throw TerminalStateException();
     // fetch all available Q-values
     final Map<MocafeQVector, double> qValuesOfState =
         fetchHistoricalQValues(state);
@@ -79,10 +80,10 @@ class MocafeQLAgent extends QLAgent {
     Action actionToBeTaken,
     ArgSet argSetUsed,
   ) {
-    print(qTable.entries
+    /* print(qTable.entries
         .where((e) => e.value > 0)
         .map((e) => "${e.key.toVectorStr()}\n${e.value}\n")
-        .join());
+        .join()); */
     final bool has =
         qTable.containsKey(MocafeQVector(stateIn, actionToBeTaken, argSetUsed));
     final MocafeState state = MocafeState.current(env);
@@ -117,7 +118,8 @@ class MocafeQLAgent extends QLAgent {
   }
 
   /// This method defines the action selection policy. Set [runConfigs.epsilonValue] to 1
-  /// to obtain ε-greedy/optimal policy.
+  /// to obtain ε-greedy/optimal policy. A higher epsilon value favours exploitation
+  /// over exploration.
   T select<T>(List<T> possibleChoices, T optimalChoice) {
     final math.Random random = math.Random();
     if (random.nextDouble() > runConfigs.epsilonValue) {
