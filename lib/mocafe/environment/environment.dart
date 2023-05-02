@@ -4,6 +4,7 @@ class MocafeEnvironment extends DevelopmentEnv {
   final MocafeResourceConfigs mocafeResourceConfigs;
   final MocafeResourceManager mocafeResourceManager;
   final MocafeDataStore mocafeDataStore;
+  final QLRunConfigs qlRunConfigs;
 
   MocafeEnvironment({
     required super.actionSpace,
@@ -15,6 +16,7 @@ class MocafeEnvironment extends DevelopmentEnv {
     required this.mocafeResourceConfigs,
     required this.mocafeResourceManager,
     required this.mocafeDataStore,
+    required this.qlRunConfigs,
     super.observatory,
   }) : super(
           stateSpace: StateSpace<MocafeState>(
@@ -24,6 +26,7 @@ class MocafeEnvironment extends DevelopmentEnv {
           resourceConfigs: mocafeResourceConfigs,
           resourceManager: mocafeResourceManager,
           dataStore: mocafeDataStore,
+          runConfigs: qlRunConfigs,
         ) {
     MocafeState._actions.addAll(actionSpace.actions);
   }
@@ -34,7 +37,7 @@ class MocafeEnvironment extends DevelopmentEnv {
   @override
   ActionResult performAction(Action action, ArgSet argSet) {
     final MocafeState previouState = MocafeState.current(this);
-    print(argSet.toInstanceLabel());
+    //print(argSet.toInstanceLabel());
     action.body(action.convertArgSet(argSet));
     final MocafeState newState = MocafeState.current(this);
     return ActionResult(
@@ -47,22 +50,20 @@ class MocafeEnvironment extends DevelopmentEnv {
   }
 
   double computeReward() {
-    final double resourceConservationReward =
-        (mocafeResourceManager.ingredientTokens +
-                mocafeResourceManager.memoryTokens) /
-            (mocafeResourceConfigs.ingredientTokens +
-                mocafeResourceConfigs.memoryTokens!);
     final Random random = Random();
     final List<Drink> currentMenu = mocafeDataStore.menuCell.data;
     final double customerReward;
     if (currentMenu.isEmpty) {
       customerReward = 0;
     } else {
-      final int randInt = random.nextInt(currentMenu.length);
+      /* final int randInt = random.nextInt(currentMenu.length);
 
-      customerReward = currentMenu[randInt].monetaryValue;
+      customerReward = currentMenu[randInt].monetaryValue; */
+      customerReward = currentMenu.reduce((Drink v, Drink e) {
+        return v.monetaryValue > e.monetaryValue ? v : e;
+      }).monetaryValue;
     }
-    return resourceConservationReward + customerReward;
+    return customerReward;
   }
 
   @override
@@ -77,5 +78,11 @@ class MocafeEnvironment extends DevelopmentEnv {
       }
     }
     return qTable;
+  }
+
+  @override
+  void reset() {
+    mocafeResourceManager.reset();
+    mocafeDataStore.reset();
   }
 }

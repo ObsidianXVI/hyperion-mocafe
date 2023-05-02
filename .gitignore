@@ -5,5 +5,9 @@
 # Conventional directory for build output.
 build/
 
-# Irrelevant Directories
+# Irrelevant Directories and Files
 /policies
+.DS_Store
+
+# Data Directory
+/data
